@@ -15,6 +15,7 @@ process.on("uncaughtException", (err) => {
   } else {
     console.error(err);
   }
+  console.log('success')
   process.exit(1);
 });
 
