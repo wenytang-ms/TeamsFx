@@ -50,31 +50,6 @@ jobs:
         run: |
           npx lerna version prerelease --preid=alpha.d12d4701c --exact --no-push --allow-branch ${GITHUB_REF#refs/*/} --yes
 
-      - name: generate templates
-        run: |
-          .github/scripts/template-zip-autogen.sh ${{ runner.temp }}/teamsfx_templates
-
-      - name: generate templates v3
-        run: |
-          .github/scripts/template-zip-autogen-v3.sh ${{ runner.temp }}/teamsfx_templates_v3
-
-      - name: update templates alpha tag
-        uses: richardsimko/update-tag@v1
-        with:
-          tag_name: "templates-0.0.0-alpha"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: release templates' alpha version to github
-        uses: ncipollo/release-action@v1.10.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          prerelease: true
-          tag: "templates-0.0.0-alpha"
-          artifacts: ${{ runner.temp }}/teamsfx_templates/*.zip, ${{ runner.temp }}/teamsfx_templates_v3/*.zip
-          allowUpdates: true
-          removeArtifacts: true
-
       - name: pack vsix
         uses: nick-invision/retry@v2
         with:
