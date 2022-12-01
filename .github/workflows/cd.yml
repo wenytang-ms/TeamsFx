@@ -32,93 +32,95 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           ref: ${{ github.ref }}
 
-      - name: Setup node
-        uses: actions/setup-node@v2.1.2
-        with:
-          node-version: 14
+      # - name: Setup node
+      #   uses: actions/setup-node@v2.1.2
+      #   with:
+      #     node-version: 14
 
-      - name: Setup project
-        run: |
-          npm run setup
+      # - name: Setup project
+      #   run: |
+      #     npm run setup
 
-      - name: Setup git
-        run: |
-          git config --global user.name 'MSFT-yiz'
-          git config --global user.email 'yiz@microsoft.com'
+      # - name: Setup git
+      #   run: |
+      #     git config --global user.name 'MSFT-yiz'
+      #     git config --global user.email 'yiz@microsoft.com'
 
-      - name: release alpha npm packages to npmjs.org
-        run: |
-          npx lerna version prerelease --preid=alpha.d12d4701c --exact --no-push --allow-branch ${GITHUB_REF#refs/*/} --yes
+      # - name: release alpha npm packages to npmjs.org
+      #   run: |
+      #     npx lerna version prerelease --preid=alpha.d12d4701c --exact --no-push --allow-branch ${GITHUB_REF#refs/*/} --yes
 
-      - name: generate templates
-        run: |
-          .github/scripts/template-zip-autogen.sh ${{ runner.temp }}/teamsfx_templates
+      # - name: generate templates
+      #   run: |
+      #     .github/scripts/template-zip-autogen.sh ${{ runner.temp }}/teamsfx_templates
 
-      - name: generate templates v3
-        run: |
-          .github/scripts/template-zip-autogen-v3.sh ${{ runner.temp }}/teamsfx_templates_v3
+      # - name: generate templates v3
+      #   run: |
+      #     .github/scripts/template-zip-autogen-v3.sh ${{ runner.temp }}/teamsfx_templates_v3
 
-      - name: update templates alpha tag
-        uses: richardsimko/update-tag@v1
-        with:
-          tag_name: "templates-0.0.0-alpha"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # - name: update templates alpha tag
+      #   uses: richardsimko/update-tag@v1
+      #   with:
+      #     tag_name: "templates-0.0.0-alpha"
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: release templates' alpha version to github
-        uses: ncipollo/release-action@v1.10.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          prerelease: true
-          tag: "templates-0.0.0-alpha"
-          artifacts: ${{ runner.temp }}/teamsfx_templates/*.zip, ${{ runner.temp }}/teamsfx_templates_v3/*.zip
-          allowUpdates: true
-          removeArtifacts: true
+      # - name: release templates' alpha version to github
+      #   uses: ncipollo/release-action@v1.10.0
+      #   with:
+      #     token: ${{ secrets.GITHUB_TOKEN }}
+      #     prerelease: true
+      #     tag: "templates-0.0.0-alpha"
+      #     artifacts: ${{ runner.temp }}/teamsfx_templates/*.zip, ${{ runner.temp }}/teamsfx_templates_v3/*.zip
+      #     allowUpdates: true
+      #     removeArtifacts: true
 
-      - name: pack vsix
-        uses: nick-invision/retry@v2
-        with:
-          timeout_minutes: 10
-          max_attempts: 10
-          retry_on: error
-          command: |
-            sleep 20
-            cd ./packages/vscode-extension
-            npm install --only=production
-            npx vsce package
+      # - name: pack vsix
+      #   uses: nick-invision/retry@v2
+      #   with:
+      #     timeout_minutes: 10
+      #     max_attempts: 10
+      #     retry_on: error
+      #     command: |
+      #       sleep 20
+      #       cd ./packages/vscode-extension
+      #       npm install --only=production
+      #       npx vsce package
       
-      - uses: actions/upload-artifact@v3
-        with:
-          name: my-artifact
-          path: ./packages/vscode-extension/*.visx
+      # - uses: actions/upload-artifact@v3
+      #   with:
+      #     name: my-artifact
+      #     path: ./packages/vscode-extension/*.visx
 
       - name: Calculate Version Num
         id: preview-version
         run: |
           cd packages/vscode-extension
           DATE_WITH_TIME=`date "+%Y%m%d%H"`
+          cat package.json
+          echo $(jq -r .version package.json)
           PACKAGE_VERSION=$(jq -r .version package.json | cut -d '.' -f 1,2)
           TTK_VERSION=$PACKAGE_VERSION.$DATE_WITH_TIME
           echo "::set-output name=version::$TTK_VERSION
           echo $TTK_VERSION
 
-      - name: pack vsix for preview
-        env:
-          RELEASE: preview
-        uses: nick-invision/retry@v2
-        with:
-          timeout_minutes: 10
-          max_attempts: 10
-          retry_on: error
-          command: |
-            sleep 20
-            cd ./packages/vscode-extension
-            touch test.vsix
-            rm *.vsix
-            npm install --only=production
-            npx vsce package --pre-release ${{ steps.preview-version.outputs.version }}
+      # - name: pack vsix for preview
+      #   env:
+      #     RELEASE: preview
+      #   uses: nick-invision/retry@v2
+      #   with:
+      #     timeout_minutes: 10
+      #     max_attempts: 10
+      #     retry_on: error
+      #     command: |
+      #       sleep 20
+      #       cd ./packages/vscode-extension
+      #       touch test.vsix
+      #       rm *.vsix
+      #       npm install --only=production
+      #       npx vsce package --pre-release ${{ steps.preview-version.outputs.version }}
 
-      - uses: actions/upload-artifact@v3
-        with:
-          name: my-artifact2
-          path: ./packages/vscode-extension/*.visx
+      # - uses: actions/upload-artifact@v3
+      #   with:
+      #     name: my-artifact2
+      #     path: ./packages/vscode-extension/*.visx
