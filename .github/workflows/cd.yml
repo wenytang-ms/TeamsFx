@@ -97,9 +97,8 @@ jobs:
         run: |
           cd packages/vscode-extension
           DATE_WITH_TIME=`date "+%Y%m%d%H"`
-          echo $(jq .version package.json)
-          echo $(jq .version package.json | cut -d . -f1,2)
-          PACKAGE_VERSION=$(jq -r .version package.json | cut -d . -f1,2)
+          version=$(jq -r .version package.json)
+          PACKAGE_VERSION=$(echo $version | cut -d . -f1,2)
           TTK_VERSION=$PACKAGE_VERSION.$DATE_WITH_TIME
           echo "::set-output name=version::$TTK_VERSION
           echo $TTK_VERSION
