@@ -98,8 +98,8 @@ jobs:
         run: |
           DATE_WITH_TIME=`date "+%Y%m%d%H"`
           version=$(jq -r .version package.json)
-          PACKAGE_VERSION=${${version%-*}%.*}
-          TTK_VERSION=$PACKAGE_VERSION.$DATE_WITH_TIME
+          version=${version%-*}
+          TTK_VERSION=${version%.*}.$DATE_WITH_TIME
           echo "::set-output name=version::$TTK_VERSION
           echo $TTK_VERSION
 
