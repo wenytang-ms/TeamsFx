@@ -87,14 +87,10 @@ jobs:
             npm install --only=production
             npx vsce package
       
-      - name: release alpha and beta VSCode extension to github
-        uses: ncipollo/release-action@v1.10.0
+      - uses: actions/upload-artifact@v3
         with:
-          token: ${{ secrets.CD_PAT }}
-          tag: "vscode-extension-alpha.1"
-          artifacts: ./packages/**/*.vsix
-          prerelease: true
-          artifactErrorsFailBuild: true
+          name: my-artifact
+          path: ./packages/vscode-extension/*.visx
 
       - name: Calculate Version Num
         id: preview-version
@@ -122,11 +118,7 @@ jobs:
             npm install --only=production
             npx vsce package --pre-release ${{ steps.preview-version.outputs.version }}
 
-      - name: release preview TTK to github release page
-        uses: ncipollo/release-action@v1.10.0
+      - uses: actions/upload-artifact@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          tag: "vscode-extension-V3-${{ steps.version-change.outputs.EXTENSION_VERSION_NUM }}"
-          artifacts: ./packages/vscode-extension/*.vsix
-          artifactErrorsFailBuild: true
-          prerelease: true
+          name: my-artifact2
+          path: ./packages/vscode-extension/*.visx
