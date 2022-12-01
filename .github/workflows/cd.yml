@@ -27,10 +27,10 @@ jobs:
     steps:
       - name: Checkout branch
         uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-          ref: ${{ github.ref }}
+        # with:
+        #   fetch-depth: 0
+        #   token: ${{ secrets.GITHUB_TOKEN }}
+        #   ref: ${{ github.ref }}
 
       # - name: Setup node
       #   uses: actions/setup-node@v2.1.2
