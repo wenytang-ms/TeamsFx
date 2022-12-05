@@ -8,6 +8,7 @@ const webpack = require("webpack");
 const CopyPlugin = require("copy-webpack-plugin");
 const terserWebpackPlugin = require("terser-webpack-plugin");
 const {DefinePlugin} = require("webpack");
+const buildConfig = require("./config");
 
 /**@type {import('webpack').Configuration}*/
 const config = {
@@ -89,7 +90,9 @@ const config = {
       "@npmcli/node-gyp"
     ),
     new DefinePlugin({
-      'process.env.TEAMSFX_V3': JSON.stringify(process.env.TEAMSFX_V3),
+      'process.env': {
+        ...buildConfig.preview.env
+      }
     }),
     new CopyPlugin({
       patterns: [
