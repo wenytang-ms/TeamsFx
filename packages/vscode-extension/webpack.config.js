@@ -89,11 +89,7 @@ const config = {
       /node-gyp[\/\\]bin[\/\\]node-gyp.js/,
       "@npmcli/node-gyp"
     ),
-    new DefinePlugin({
-      'process.env': {
-        ...buildConfig.preview.env
-      }
-    }),
+    new DefinePlugin(buildConfig.preview.env),
     new CopyPlugin({
       patterns: [
         {
