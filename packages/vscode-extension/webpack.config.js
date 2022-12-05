@@ -89,7 +89,9 @@ const config = {
       /node-gyp[\/\\]bin[\/\\]node-gyp.js/,
       "@npmcli/node-gyp"
     ),
-    new DefinePlugin(buildConfig.preview.env),
+    new DefinePlugin({
+      "process.env.TEAMSFX_V3": JSON.stringify(process.env.TEAMSFX_V3)
+    }),
     new CopyPlugin({
       patterns: [
         {
