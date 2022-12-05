@@ -63,7 +63,7 @@ jobs:
       - name: pack vsix for preview
         uses: nick-invision/retry@v2
         env:
-          TEAMSFX_V3: true
+          RELEASE: preview
         with:
           timeout_minutes: 10
           max_attempts: 10
