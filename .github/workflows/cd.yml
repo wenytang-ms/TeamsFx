@@ -51,7 +51,6 @@ jobs:
           npx lerna version prerelease --preid=alpha.d12d4701c --exact --no-push --allow-branch ${GITHUB_REF#refs/*/} --yes
 
       - name: pack vsix
-        if: ${{ contains(steps.version-change.outputs.CHANGED, 'ms-teams-vscode-extension@') }}
         uses: nick-invision/retry@v2
         with:
           timeout_minutes: 10
