@@ -61,8 +61,6 @@ jobs:
           echo $TTK_VERSION
 
       - name: pack vsix for preview
-        env:
-          RELEASE: preview
         uses: nick-invision/retry@v2
         with:
           timeout_minutes: 10
