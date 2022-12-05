@@ -19,7 +19,6 @@ export class RemoteBotRegistration extends BotRegistration {
     if (botAadRes.isErr()) {
       return err(botAadRes.error);
     }
-    logProvider?.info(Messages.SuccessfullyCreatedBotAadApp);
     // Didn't provision Azure bot service because it's handled by arm/bicep snippets.
     return ok(botAadRes.value);
   }
@@ -27,9 +26,9 @@ export class RemoteBotRegistration extends BotRegistration {
   public async createOrUpdateBotRegistration(
     m365TokenProvider: M365TokenProvider,
     botRegistration: IBotRegistration
-  ): Promise<Result<undefined, FxError>> {
+  ): Promise<Result<boolean, FxError>> {
     // Do nothing because it's handled by arm/bicep snippets.
-    return ok(undefined);
+    return ok(false);
   }
 
   public async updateMessageEndpoint(

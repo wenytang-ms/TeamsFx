@@ -28,7 +28,6 @@ export class LocalBotRegistration extends BotRegistration {
     if (botAadRes.isErr()) {
       return err(botAadRes.error);
     }
-    logProvider?.info(Messages.SuccessfullyCreatedBotAadApp);
 
     const botAadCredentials: BotAadCredentials = botAadRes.value;
 
@@ -58,7 +57,7 @@ export class LocalBotRegistration extends BotRegistration {
   public async createOrUpdateBotRegistration(
     m365TokenProvider: M365TokenProvider,
     botRegistration: IBotRegistration
-  ): Promise<Result<undefined, FxError>> {
+  ): Promise<Result<boolean, FxError>> {
     // 1. Get bot registration from remote.
     // 2. If Not Found, Then create a new bot registration.
     // 3. Else:
@@ -86,7 +85,7 @@ export class LocalBotRegistration extends BotRegistration {
       );
       await AppStudioClient.updateBotRegistration(appStudioToken, mergedBotRegistration);
     }
-    return ok(undefined);
+    return ok(remoteBotRegistration !== undefined);
   }
 
   public async updateMessageEndpoint(

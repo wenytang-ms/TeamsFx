@@ -166,6 +166,11 @@ export const provisionOutputNamingsV3: string[] = [
   "state.fx-resource-key-vault.m365ClientSecretReference",
   "state.fx-resource-key-vault.botClientSecretReference",
 ];
+export const nameMappingV3: { [key: string]: string } = {
+  "state.fx-resource-aad-app-for-teams.botEndpoint": "state.fx-resource-bot.siteEndpoint",
+  "state.fx-resource-aad-app-for-teams.frontendEndpoint":
+    "state.fx-resource-frontend-hosting.endpoint",
+};
 export const pluginIdMappingV3: { [key: string]: string } = {
   "fx-resource-frontend-hosting": "teams-tab",
   "fx-resource-function": "teams-api",
@@ -191,9 +196,14 @@ function generateOutputNameRegexForPlugin(pluginId: string) {
 export function namingConverterV3(
   name: string,
   type: FileType,
-  bicepContent: string
+  bicepContent: string,
+  needsRename = false
 ): Result<string, FxError> {
   try {
+    // Needs to map certain values only when migrating manifest
+    if (needsRename && Object.keys(nameMappingV3).includes(name)) {
+      name = nameMappingV3[name];
+    }
     if (Object.keys(fixedNamingsV3).includes(name)) {
       return ok(fixedNamingsV3[name]);
     } else if (
@@ -272,4 +282,23 @@ function provisionOutputNamingConverterV3(name: string, bicepContent: string): s
   }
 
   return `${provisionOutputPrefix}${outputName}__${keyName}`.toUpperCase();
+}
+
+export function replacePlaceholdersForV3(content: string, bicepContent: string): string {
+  const placeholderRegex = /{{+ *[a-zA-Z_.-][a-zA-Z0-9_.-]* *}}+/g;
+  const placeholders = content.match(placeholderRegex);
+
+  if (placeholders) {
+    for (const placeholder of placeholders) {
+      const envNameV2 = placeholder.replace(/\{/g, "").replace(/\}/g, "");
+      const envNameV3 = namingConverterV3(envNameV2, FileType.STATE, bicepContent, true);
+      if (envNameV3.isOk()) {
+        content = content.replace(placeholder, `$\{\{${envNameV3.value}\}\}`);
+      } else {
+        throw envNameV3.error;
+      }
+    }
+  }
+
+  return content;
 }

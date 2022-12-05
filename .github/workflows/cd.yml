@@ -50,23 +50,6 @@ jobs:
         run: |
           npx lerna version prerelease --preid=alpha.d12d4701c --exact --no-push --allow-branch ${GITHUB_REF#refs/*/} --yes
 
-      - name: pack vsix
-        uses: nick-invision/retry@v2
-        with:
-          timeout_minutes: 10
-          max_attempts: 10
-          retry_on: error
-          command: |
-            sleep 20
-            cd ./packages/vscode-extension
-            npm install --only=production
-            npx vsce package
-      
-      - uses: actions/upload-artifact@v3
-        with:
-          name: my-artifact
-          path: ./packages/vscode-extension/*.vsix
-
       - name: Calculate Version Num
         id: preview-version
         working-directory: packages/vscode-extension
