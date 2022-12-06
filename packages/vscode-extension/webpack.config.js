@@ -90,7 +90,7 @@ const config = {
       "@npmcli/node-gyp"
     ),
     new DefinePlugin({
-      "process.env.TEAMSFX_V3": JSON.stringify(process.env.TEAMSFX_V3)
+      "process.env.TEAMSFX_V3": JSON.stringify(true)
     }),
     new CopyPlugin({
       patterns: [
