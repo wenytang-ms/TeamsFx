@@ -53,6 +53,10 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 14
+      - name: set git
+        run: |
+          git config --global user.name 'ACCC'
+          git config --global user.email 'bbd@microsoft.com'
       - name: lerna expect pre version
         if: ${{ github.event.pull_request.base.ref == 'prerelease' }}
         run: |
