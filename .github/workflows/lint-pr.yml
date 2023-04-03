@@ -225,7 +225,7 @@ jobs:
       - name: lerna expect pre version
         if: ${{ github.event.pull_request.base.ref == 'prerelease' }}
         run: |
-          npx lerna version prerelease --preid=beta.$(date "+%Y%m%d%H") --exact --no-push --allow-branch ${GITHUB_REF#refs/*/} --yes
+          npx lerna version prerelease --preid=beta.$(date "+%Y%m%d%H") --exact --no-push --allow-branch ${{ github.event.pull_request.head.ref }} --yes
           npx lerna changed -l | awk '{ print $1 "\t" $2 }'> version_info.txt
       - name: lerna expect rc version
         if: ${{ github.event.pull_request.base.ref == 'main' }}
