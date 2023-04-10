@@ -6,6 +6,11 @@ on:
       - opened
       - edited
       - synchronize
+    branches:
+      - main
+      - dev
+      - hotfix/**/*
+      - prerelease
   schedule:
     - cron: "0 8 * * *"
 
