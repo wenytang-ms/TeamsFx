@@ -202,7 +202,7 @@ jobs:
         id: description
         shell: "/bin/bash {0}"
         run: |
-          head=${GITHUB_REF#refs/*/}
+          head=${GITHUB_REF#refs/heads/}
           echo $head
           history_cli_feat=$(git log --pretty=format:"%s %h" $head...HEAD -- packages/cli | grep "^feat")
           echo $history_cli_feat
