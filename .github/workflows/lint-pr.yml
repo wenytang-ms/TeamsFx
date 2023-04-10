@@ -198,11 +198,14 @@ jobs:
         with: 
           reviewers: "MuyangAmigo"
           token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v6
       - name: check feature history
         id: description
         shell: "/bin/bash {0}"
         run: |
-          head=${GITHUB_REF#refs/heads/}
+          head=${{ steps.branch-name.outputs.current_branch }}
           echo $head
           history_cli_feat=$(git log --pretty=format:"%s %h" $head...HEAD -- packages/cli | grep "^feat")
           echo $history_cli_feat
