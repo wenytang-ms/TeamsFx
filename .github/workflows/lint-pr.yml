@@ -6,6 +6,11 @@ on:
       - opened
       - edited
       - synchronize
+    branches:
+      - main
+      - dev
+      - hotfix/**/*
+      - prerelease
   schedule:
     - cron: "0 8 * * *"
 
@@ -180,7 +185,6 @@ jobs:
           python .github/detect/sensitive-detect.py repo
 
   attension-on-version:
-    if: ${{ github.event_name ==  'pull_request' && (github.event.pull_request.base.ref == 'main' || github.event.pull_request.base.ref == 'prerelease') && github.event.action != 'edited' }}
     runs-on: ubuntu-latest
     steps:
       - name: checkout branch
@@ -194,11 +198,14 @@ jobs:
         with: 
           reviewers: "MuyangAmigo"
           token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v6
       - name: check feature history
         id: description
         shell: "/bin/bash {0}"
         run: |
-          head=$(git describe --first-parent --abbrev=0)
+          head=${{ steps.branch-name.outputs.current_branch }}
           echo $head
           history_cli_feat=$(git log --pretty=format:"%s %h" $head...HEAD -- packages/cli | grep "^feat")
           echo $history_cli_feat
