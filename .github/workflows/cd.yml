@@ -37,11 +37,6 @@ jobs:
         with:
           node-version: 14
 
-      - name: Setup verdaccio
-        run: |
-          npm i -g verdaccio
-          verdaccio -c ./packages/vscode-extension/scripts/verdaccio.yaml &
-
       - name: Setup project
         run: |
           npm run setup
@@ -77,12 +72,6 @@ jobs:
         run: |
           .github/scripts/template-zip-autogen-v3.sh ${{ runner.temp }}/teamsfx_templates_v3
 
-      - name: publish alpha release to npm org
-        run: |
-          npx lerna publish from-package --dist-tag=alpha --yes --allow-branch testcd
-        env:
-          TEMPLATE_PATH: ${{ runner.temp }}/teamsfx_templates_v3
-
       - name: pack vsix
         env:
           NODE_OPTIONS: "--max_old_space_size=4096"
@@ -92,19 +81,7 @@ jobs:
           max_attempts: 10
           retry_on: error
           command: |
-            sleep 20
-            cd ./packages/vscode-extension
-            npm install --only=production
-            npx vsce package
-
-      - name: release stable VSCode extension to github
-        uses: ncipollo/release-action@v1.10.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ steps.version-change.outputs.EXTENSION_VERSION }}
-          artifacts: ./packages/**/*.vsix
-          artifactErrorsFailBuild: true
-          bodyFile: ./CHANGELOG.md
+            npx ts-node ./packages/vscode-extension/scripts/vsce_locally.ts
 
       - name: save release info
         run: |
