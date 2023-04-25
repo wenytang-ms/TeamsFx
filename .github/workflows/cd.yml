@@ -38,7 +38,7 @@ jobs:
       - name: Setup verdaccio
         run: |
           npm i -g verdaccio
-          verdaccio -c ./packages/vscode-extension/scripts/verdaccio.yaml
+          verdaccio -c ./packages/vscode-extension/scripts/verdaccio.yaml &
 
       - name: Setup project
         run: |
