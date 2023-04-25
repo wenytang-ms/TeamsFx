@@ -21,9 +21,6 @@ on:
 jobs:
   cd:
     runs-on: ubuntu-latest
-    env:
-      NPM_CONFIG_REGISTRY: "http://localhost:4873"
-      NPM_TOKEN: "1000"
     steps:
       - name: Checkout branch
         uses: actions/checkout@v3
