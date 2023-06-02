@@ -40,7 +40,7 @@ jobs:
         with:
           name: release
           path: |
-            tmp/changed.txt
-            tmpversions.json
-            tmp/*.vsix
-            tmp/*.exe
+            changed.txt
+            versions.json
+            *.vsix
+            *.exe
