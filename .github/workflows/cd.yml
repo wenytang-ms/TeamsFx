@@ -45,7 +45,7 @@ jobs:
           command: |
             sleep 20
             cd ./packages/vscode-extension
-            npm install --only=production
+            npm install
             npx vsce package --pre-release
 
       - name: save release info
