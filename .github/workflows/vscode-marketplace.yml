@@ -23,11 +23,6 @@ jobs:
         run: |
           npm install vsce -g
 
-      - name: Download VISX fils
+      - name: echo TeamsFx-CICD-Test
         run: |
-          wget --tries=5 --waitretry=5 ${{ github.event.inputs.URL }} 
-
-      - name: release to VSCode marketplace
-        run: vsce publish --pat $PAT --packagePath *.vsix
-        env:
-          PAT: ${{ secrets.VSCE_PAT }}
+          echo "TeamsFx-CICD-Test"
