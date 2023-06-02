@@ -37,3 +37,4 @@ jobs:
         with: 
           github_token: ${{ secrets.GITHUB_TOKEN }}
           custom_tag: ${{ steps.vsc_ver.outputs.vsc_ver }}
+          tag_prefix: ""
