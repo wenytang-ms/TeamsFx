@@ -15,7 +15,6 @@ on:
 jobs:
   publish-to-vscode-marketplace:
     runs-on: ubuntu-latest
-    environment: production
 
     steps:
       - name: Setup node

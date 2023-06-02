@@ -29,40 +29,18 @@ jobs:
           token: ${{ secrets.github_token }}
           ref: ${{ github.ref }}
 
-      - name: Setup node
-        uses: actions/setup-node@v2.1.2
-        with:
-          node-version: 14
-
-      - name: Setup project
-        run: npm run setup
-
-      - name: pack vsix
-        uses: nick-invision/retry@v2
-        with:
-          timeout_minutes: 10
-          max_attempts: 10
-          retry_on: error
-          command: |
-            sleep 20
-            cd ./packages/vscode-extension
-            npm install --only=production
-            npx vsce package --pre-release
-
-      - name: save release info
+      - name: unzip file
         run: |
-          rm -f changed.txt
-          rm -f versions.json
-          echo ${{steps.version-change.outputs.CHANGED}} > changed.txt
-          find ./packages/vscode-extension -type f -name '*.vsix' -exec mv {} . \;
-          find ./packages/server/lib -type f -name '*.exe' -exec mv {} server.exe \;
+          sudo apt-get install unzip
+          unzip tmp/release.zip
+          ls -a
 
       - name: upload release info to artifact
         uses: actions/upload-artifact@v3
         with:
           name: release
           path: |
-            changed.txt
-            versions.json
-            *.vsix
-            *.exe
+            tmp/changed.txt
+            tmpversions.json
+            tmp/*.vsix
+            tmp/*.exe
