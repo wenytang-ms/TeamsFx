@@ -22,9 +22,9 @@ jobs:
         run: |
           echo $AZURE_TEST_ACCOUNT1 "----------------" $AZURE_TEST_ACCOUNT2 > test.txt
 
-      - name: upload artifacts
-        uses: artifacts-upload-action@v2
-        with: 
-          name: artifacts
+      - name: upload release info to artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: release
           path: |
             test.txt
