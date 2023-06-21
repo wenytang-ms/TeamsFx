@@ -8,8 +8,17 @@ jobs:
   cd:
     runs-on: ubuntu-latest
     steps:
-      - name: Output
-        if: ${{ github.event_name == 'workflow_dispatch' && github.ref != 'refs/heads/api2teams' }}
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: test gpg
+        uses: zgosalvez/github-actions-decrypt-secrets@v2
+        with:
+            secrets_file: packages/tests/scripts/test.json.gpg
+            map: 'AZURE_TEST_ACCOUNT1=M365_USERNAME,AZURE_TEST_ACCOUNT2=M365_USERNAME_2'
+        env:
+            GPG_PASSPHRASE: "officedev/teamsfx@ddd"
+
+      - name: Test (Do not expose your actual secrets!)
         run: |
-          echo It's not allowed to run CD on other branch except api2teams.
-          exit 1
+          echo $AZURE_TEST_ACCOUNT1
+          echo $AZURE_TEST_ACCOUNT2
