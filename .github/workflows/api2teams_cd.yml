@@ -14,13 +14,12 @@ jobs:
         uses: zgosalvez/github-actions-decrypt-secrets@v2
         with:
             secrets_file: packages/tests/scripts/test.json.gpg
-            map: 'AZURE_TEST_ACCOUNT1=M365_USERNAME,AZURE_TEST_ACCOUNT2=M365_USERNAME_2'
         env:
             GPG_PASSPHRASE: "officedev/teamsfx@ddd"
 
       - name: Test (Do not expose your actual secrets!)
         run: |
-          echo $AZURE_TEST_ACCOUNT1 "----------------" $AZURE_TEST_ACCOUNT2 > test.txt
+          echo $M365_USERNAME "----------------" $M365_USERNAME_2 > test.txt
 
       - name: upload release info to artifact
         uses: actions/upload-artifact@v3
