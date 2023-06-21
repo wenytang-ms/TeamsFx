@@ -115,7 +115,7 @@ jobs:
           if [ ! -z "${{ github.event.inputs.test-case }}" ]; then
             matrix='{"node-version": ${{ github.event.inputs.node-version }}, "test-case": ${{ github.event.inputs.test-case }}, "os": ${{ github.event.inputs.os }} }'
           else
-            bash ./scripts/convert-test-case.sh ./workflows/pvt.json
+            bash ./scripts/convert-test-case.sh ./scripts/pvt.json
             matrix=$(cat ./scripts/test-case-temp.json)
           fi
 
