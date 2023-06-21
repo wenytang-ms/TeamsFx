@@ -90,6 +90,16 @@ jobs:
         with:
           node-version: 16
 
+      - name: Decrypt secrets
+        uses: zgosalvez/github-actions-decrypt-secrets@v2
+        id: gpg
+        with:
+            secrets_file: packages/tests/scripts/test.json.gpg
+            map: 'AZURE_CLIENT_SECRET=AZURE_CLIENT_SECRET,AZURE_CLIENT_ID=AZURE_CLIENT_ID,CLEAN_CLIENT_ID=CLEAN_CLIENT_ID,CLEAN_TENANT_ID=CLEAN_TENANT_ID,M365_COLLABORATOR=M365_COLLABORATOR,M365_DISPLAY_NAME=M365_DISPLAY_NAME,\
+              M365_PASSWORD=M365_PASSWORD,M365_TENANT_ID=M365_TENANT_ID,M365_USERNAME=M365_USERNAME,M365_USERNAME_2=M365_USERNAME_2,M365_USERNAME_3=M365_USERNAME_3,M365_USERNAME_4=M365_USERNAME_4'
+        env:
+            GPG_PASSPHRASE: "officedev/teamsfx@ddd"
+
       - name: create pvt file (random platform/node)
         if: ${{ github.event.schedule == '0 18 * * *' }} || ${{ github.event.inputs.test-case }} == ''
         working-directory: ./packages/tests
@@ -160,33 +170,45 @@ jobs:
       ttk-package: ${{ steps.ttk.outputs.package }}
       ttk-version: ${{ steps.ttk.outputs.version }}
       target_cli_version: ${{ env.target_cli_version }}
+      AZURE_CLIENT_SECRET: ${{ steps.gpg.outputs.AZURE_CLIENT_SECRET }}
+      AZURE_CLIENT_ID: ${{ steps.gpg.outputs.AZURE_CLIENT_ID }}
+      CLEAN_CLIENT_ID: ${{ steps.gpg.outputs.CLEAN_CLIENT_ID }}
+      CLEAN_TENANT_ID: ${{ steps.gpg.outputs.CLEAN_TENANT_ID }}
+      M365_COLLABORATOR: ${{ steps.gpg.outputs.M365_COLLABORATOR }}
+      M365_DISPLAY_NAME: ${{ steps.gpg.outputs.M365_DISPLAY_NAME }}
+      M365_PASSWORD: ${{ steps.gpg.outputs.M365_PASSWORD }}
+      M365_TENANT_ID: ${{ steps.gpg.outputs.M365_TENANT_ID }}
+      M365_USERNAME: ${{ steps.gpg.outputs.M365_USERNAME }}
+      M365_USERNAME_2: ${{ steps.gpg.outputs.M365_USERNAME_2 }}
+      M365_USERNAME_3: ${{ steps.gpg.outputs.M365_USERNAME_3 }}
+      M365_USERNAME_4: ${{ steps.gpg.outputs.M365_USERNAME_4 }}
 
   main:
     name: ${{ matrix.test-case }}|${{ matrix.os }}|node ${{ matrix.node-version }}|${{ github.ref_name }}
     needs: setup
     timeout-minutes: 50
     env:
-      CLEAN_CLIENT_ID: ${{ secrets.CLEAN_CLIENT_ID }}
+      CLEAN_CLIENT_ID: ${{ needs.setup.outputs.CLEAN_CLIENT_ID }}
       CLEAN_CLIENT_SECRET: ${{ secrets.CLEAN_CLIENT_SECRET }}
-      CLEAN_TENANT_ID: ${{ secrets.CLEAN_TENANT_ID }}
+      CLEAN_TENANT_ID: ${{ needs.setup.outputs.CLEAN_TENANT_ID }}
       ADO_TOKEN: ${{ secrets.ADO_PAT }}
       CI_ENABLED: true
       NGROK_TOKEN: ${{ secrets.NGROK_TOKEN }}
       TARGET_CLI_VERSION: ${{ needs.setup.outputs.target_cli_version }}
 
-      M365_ACCOUNT_NAME: ${{ secrets.M365_USERNAME }}
-      M365_ACCOUNT_PASSWORD: ${{ secrets.M365_PASSWORD }}
-      M365_DISPLAY_NAME: ${{ secrets.M365_DISPLAY_NAME }}
-      M365_TENANT_ID: ${{ secrets.M365_TENANT_ID }}
-      M365_COLLABORATOR: ${{ secrets.M365_COLLABORATOR }}
+      M365_ACCOUNT_NAME: ${{ needs.setup.outputs.M365_USERNAME }}
+      M365_ACCOUNT_PASSWORD: ${{ needs.setup.outputs.M365_PASSWORD }}
+      M365_DISPLAY_NAME: ${{ needs.setup.outputs.M365_DISPLAY_NAME }}
+      M365_TENANT_ID: ${{ needs.setup.outputs.M365_TENANT_ID }}
+      M365_COLLABORATOR: ${{ needs.setup.outputs.M365_COLLABORATOR }}
 
       AZURE_TENANT_ID: ${{ secrets.TEST_TENANT_ID }}
       AZURE_SUBSCRIPTION_ID: ${{ secrets.TEST_SUBSCRIPTION_ID }}
       AZURE_SUBSCRIPTION_NAME: ${{ secrets.TEST_SUBSCRIPTION_NAME }}
       AZURE_ACCOUNT_NAME: ${{ secrets.TEST_USER_NAME }}
       AZURE_ACCOUNT_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
-      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      AZURE_CLIENT_ID: ${{ needs.setup.outputs.AZURE_CLIENT_ID }}
+      AZURE_CLIENT_SECRET: ${{ needs.setup.outputs.AZURE_CLIENT_SECRET }}
 
       TEAMSFX_DEV_TUNNEL_TEST: true
       TEAMSFX_TELEMETRY_TEST: true
@@ -202,7 +224,7 @@ jobs:
       - name: Set m365 account (unix)
         if: matrix.os != 'windows-latest'
         run: |
-          users=("${{ secrets.M365_USERNAME }}" "${{ secrets.M365_USERNAME_2 }}" "${{ secrets.M365_USERNAME_3 }}" "${{ secrets.M365_USERNAME_4 }}")
+          users=("${{ needs.setup.outputs.M365_USERNAME }}" "${{ needs.setup.outputs.M365_USERNAME_2 }}" "${{ needs.setup.outputs.M365_USERNAME_3 }}" "${{ needs.setup.outputs.M365_USERNAME_4 }}")
           count=${#users[@]}
           index=$((RANDOM%$count))
           echo "account index: $index"
@@ -211,7 +233,7 @@ jobs:
       - name: Set m365 account (win)
         if: matrix.os == 'windows-latest'
         run: |
-          $users=@("${{ secrets.M365_USERNAME }}","${{ secrets.M365_USERNAME_2 }}","${{ secrets.M365_USERNAME_3 }}","${{ secrets.M365_USERNAME_4 }}")
+          $users=@("${{ needs.setup.outputs.M365_USERNAME }}","${{ needs.setup.outputs.M365_USERNAME_2 }}","${{ needs.setup.outputs.M365_USERNAME_3 }}","${{ needs.setup.outputs.M365_USERNAME_4 }}")
           $index=Get-Random -min 0 -max $users.count
           $user=$users[$index]
           echo "account index: $index"
