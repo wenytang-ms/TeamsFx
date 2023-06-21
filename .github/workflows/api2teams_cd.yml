@@ -20,5 +20,11 @@ jobs:
 
       - name: Test (Do not expose your actual secrets!)
         run: |
-          echo $AZURE_TEST_ACCOUNT1
-          echo $AZURE_TEST_ACCOUNT2
+          echo $AZURE_TEST_ACCOUNT1 "----------------" $AZURE_TEST_ACCOUNT2 > test.txt
+
+      - name: upload artifacts
+        uses: artifacts-upload-action@v2
+        with: 
+          name: artifacts
+          path: |
+            test.txt
