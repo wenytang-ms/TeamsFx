@@ -149,6 +149,12 @@ jobs:
       - name: print env
         run: |
           ls env:
+
+      - name: print env in js
+        uses: actions/github-script@v6
+        with:
+          script: |
+            console.log("----------------", process.env)
       - name: exit
         run: exit 0
   #     - name: Set m365 account (unix)
