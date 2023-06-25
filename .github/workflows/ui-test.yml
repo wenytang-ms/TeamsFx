@@ -217,9 +217,6 @@ jobs:
       max-parallel: 50
       matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
     runs-on: ${{ matrix.os }}
-    defaults:
-      run: 
-        working-directory: packages/tests
     steps:
       - name: Set m365 account (unix)
         if: matrix.os != 'windows-latest'
@@ -283,6 +280,7 @@ jobs:
           Start-Process powershell -verb RunAs -ArgumentList $filePath -wait
 
       - name: Install npm packages
+        working-directory: packages/tests
         run: |
           npm install
 
@@ -290,25 +288,29 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: ttk
-          path: ./
+          path: ./packages/tests
 
       - name: Install teamsfx cli (for migration use latest)
         if: contains(matrix.test-case,  'upgrade') && contains(matrix.test-case,  '4.0.0') == false && contains(matrix.test-case,  '3.x') == false
+        working-directory: packages/tests
         run: |
           npm install @microsoft/teamsfx-cli@1.2.6
 
       - name: Install teamsfx cli (for migration use 1.0.0)
         if: contains(matrix.test-case,  '4.0.0')
+        working-directory: packages/tests
         run: |
           npm install @microsoft/teamsfx-cli@1.0.0
 
       - name: Install teamsfx cli (for migration use 0.2.0)
         if: contains(matrix.test-case,  '3.x')
+        working-directory: packages/tests
         run: |
           npm install @microsoft/teamsfx-cli@0.2.0
 
       - name: Install teamsfx cli
         if: contains(matrix.test-case,  'upgrade') == false
+        working-directory: packages/tests
         run: |
           npm install @microsoft/teamsfx-cli@${{ needs.setup.outputs.npm-tag }}
 
@@ -318,7 +320,7 @@ jobs:
         with:
           repository: OfficeDev/TeamsFx-Samples
           ref: ${{ needs.setup.outputs.sample-ref }}
-          path: resource
+          path: ./packages/tests/resource
 
       - name: Download samples from another repo
         if: contains(matrix.test-case, 'proactive-message')
@@ -326,7 +328,7 @@ jobs:
         with:
           repository: OfficeDev/Microsoft-Teams-Samples
           ref: main
-          path: resource
+          path: ./packages/tests/resource
 
       - name: Get VSCode & chromedriver
         run: |
@@ -343,23 +345,27 @@ jobs:
           npx ts-node src/scripts/azureLogin.ts -- '${{ env.AZURE_ACCOUNT_NAME }}' '${{ env.AZURE_ACCOUNT_PASSWORD }}'
 
       - name: Build
+        working-directory: packages/tests
         run: |
           npm run build
 
       - name: Install vsix(unix)
         if: matrix.os != 'windows-latest'
+        working-directory: packages/tests
         run: |
           vsix=`find . -type f -name "*.vsix" | sed 's|.*/\(.*\)|\1|'`
           npx extest install-vsix --storage .test-resources --extensions_dir .test-resources --type stable --vsix_file $vsix
 
       - name: Install vsix(win)
         if: matrix.os == 'windows-latest'
+        working-directory: packages/tests
         run: |
           $vsix = (Get-ChildItem *.vsix | Select-Object -ExpandProperty Name)
           npx extest install-vsix --storage .test-resources --extensions_dir .test-resources --type stable --vsix_file $vsix
 
       - name: Run UI Test(ubuntu)
         if: matrix.os == 'ubuntu-latest'
+        working-directory: packages/tests
         run: |
           sudo apt-get install xvfb
           export DISPLAY=:99.0
@@ -368,6 +374,7 @@ jobs:
 
       - name: Run UI Test(mac & win)
         if: matrix.os != 'ubuntu-latest'
+        working-directory: packages/tests
         run: |
           npx extest run-tests --storage .test-resources --extensions_dir .test-resources --type stable --code_version 1.78.0 --code_settings ./settings.json ./out/ui-test/**/${{ matrix.test-case }}.test.js
 
@@ -376,14 +383,14 @@ jobs:
         if: failure()
         with:
           name: test result ${{ matrix.test-case }} ${{ matrix.os }}
-          path: ./mochawesome-report/mochawesome.json
+          path: ./packages/tests/mochawesome-report/mochawesome.json
 
       - name: Upload screenshots
         uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: screenshots ${{ matrix.test-case }} ${{ matrix.os }}
-          path: .test-resources/screenshots/
+          path: ./packages/tests/test-resources/screenshots/
 
       - name: Upload source code
         uses: actions/upload-artifact@v3
@@ -391,8 +398,8 @@ jobs:
         with:
           name: source code ${{ matrix.test-case }} ${{ matrix.os }}
           path: |
-            **/teamsfxuitest*/*
-            !**/node_modules/*
+            ./packages/tests/**/teamsfxuitest*/*
+            !./packages/tests/**/node_modules/*
 
       - name: Upload telemetry
         uses: actions/upload-artifact@v3
@@ -407,10 +414,11 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: testplan
-          path: ./
+          path: ./packages/tests
 
       - name: Sync to Azure DevOps Test Plan
         if: always() && contains(needs.setup.outputs.ttk-version, 'alpha') == false
+        working-directory: packages/tests
         run: |
           npx ts-node src/scripts/testPlan.ts report ./testplan.json ./mochawesome-report/mochawesome.json
 
