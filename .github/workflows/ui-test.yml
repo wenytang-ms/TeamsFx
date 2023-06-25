@@ -331,16 +331,19 @@ jobs:
           path: ./packages/tests/resource
 
       - name: Get VSCode & chromedriver
+        working-directory: packages/tests
         run: |
           npx extest get-vscode --storage .test-resources --type stable --code_version 1.78.0
           npx extest get-chromedriver --storage .test-resources --type stable --code_version 1.78.0
 
       - name: M365 Login
+        working-directory: packages/tests
         run: | # rm -r -f ~/.fx/account
           npx ts-node src/scripts/m365Login.ts -- '${{ env.M365_ACCOUNT_NAME }}' '${{ env.M365_ACCOUNT_PASSWORD }}'
 
       - name: Azure Login(win)
         if: matrix.os == 'windows-latest'
+        working-directory: packages/tests
         run: |
           npx ts-node src/scripts/azureLogin.ts -- '${{ env.AZURE_ACCOUNT_NAME }}' '${{ env.AZURE_ACCOUNT_PASSWORD }}'
 
