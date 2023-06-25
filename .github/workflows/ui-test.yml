@@ -64,13 +64,22 @@ jobs:
 
       - name: Decrypt secrets
         uses: zgosalvez/github-actions-decrypt-secrets@v2
-        id: gpg
         with:
             secrets_file: packages/tests/scripts/test.json.gpg
             map: 'AZURE_CLIENT_SECRET=AZURE_CLIENT_SECRET,AZURE_CLIENT_ID=AZURE_CLIENT_ID,CLEAN_CLIENT_ID=CLEAN_CLIENT_ID,CLEAN_TENANT_ID=CLEAN_TENANT_ID,M365_COLLABORATOR=M365_COLLABORATOR,M365_DISPLAY_NAME=M365_DISPLAY_NAME,\
               M365_PASSWORD=M365_PASSWORD,M365_TENANT_ID=M365_TENANT_ID,M365_USERNAME=M365_USERNAME,M365_USERNAME_2=M365_USERNAME_2,M365_USERNAME_3=M365_USERNAME_3,M365_USERNAME_4=M365_USERNAME_4'
         env:
             GPG_PASSPHRASE: "officedev/teamsfx@ddd"
+
+      - name: print env
+        run: |
+          printenv > result1.txt
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: artifacta
+          path: result1.txt
 
 
     outputs:
