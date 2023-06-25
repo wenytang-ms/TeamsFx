@@ -155,6 +155,11 @@ jobs:
         with:
           script: |
             console.log("----------------", process.env)
+
+      - name: M365 Login
+        working-directory: packages/tests
+        run: | # rm -r -f ~/.fx/account
+          npx ts-node src/scripts/m365Login.ts -- '$M365_ACCOUNT_NAME' '$M365_ACCOUNT_PASSWORD'
       - name: exit
         run: exit 0
   #     - name: Set m365 account (unix)
