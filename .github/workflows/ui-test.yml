@@ -52,34 +52,6 @@ jobs:
     env:
       ADO_TOKEN: ${{ secrets.ADO_PAT }}
     steps:
-      - name: Init GitHub CLI
-        run: |
-          echo ${{ secrets.GITHUB_TOKEN }} | gh auth login --with-token
-
-      - name: bvt (dispatch)
-        id: bvt
-        if: ${{ github.event_name == 'workflow_dispatch' }}
-        run: |
-          echo "npm-tag=${{ github.event.inputs.target-cli-version }}" >> $GITHUB_OUTPUT
-          echo "sample-ref=${{ github.event.inputs.target-sample-ref }}" >> $GITHUB_OUTPUT
-          echo "branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
-          echo "vsix-run-id=${{ github.event.inputs.target-vsix-run-id }}" >> $GITHUB_ENV
-          echo "target_cli_version=${{ github.event.inputs.target-cli-version }}" >> $GITHUB_ENV
-          echo "email-receiver=${{ github.event.inputs.email-receiver }}" >> $GITHUB_OUTPUT
-
-      - name: pvt (dev)
-        id: pvt
-        if: ${{ github.event.schedule == '0 18 * * *' }}
-        run: |
-          echo "npm-tag=alpha" >> $GITHUB_OUTPUT
-          echo "sample-ref=dev" >> $GITHUB_OUTPUT
-          echo "branch=dev" >> $GITHUB_OUTPUT
-          echo "email-receiver=vsciotadt@microsoft.com;teamsfxqa@microsoft.com" >> $GITHUB_OUTPUT
-
-          run_id=`gh run list --workflow cd --repo OfficeDev/TeamsFx --branch dev --json event --json databaseId --json conclusion --jq '[.[] | select(.event=="schedule") | select(.conclusion=="success")][0].databaseId'`
-          echo "vsix-run-id=$run_id" >> $GITHUB_ENV
-          echo "target_cli_version=alpha" >> $GITHUB_ENV
-
       - name: Checkout branch
         uses: actions/checkout@v3
         with:
@@ -100,76 +72,8 @@ jobs:
         env:
             GPG_PASSPHRASE: "officedev/teamsfx@ddd"
 
-      - name: create pvt file (random platform/node)
-        if: ${{ github.event.schedule == '0 18 * * *' }} || ${{ github.event.inputs.test-case }} == ''
-        working-directory: ./packages/tests
-        run: |
-          npm install
-          npx ts-node ./scripts/createRandomPVT.ts
-
-      - name: setup matrix
-        id: setup-matrix
-        working-directory: ./packages/tests
-        run: |
-          matrix=""
-          if [ ! -z "${{ github.event.inputs.test-case }}" ]; then
-            matrix='{"node-version": ${{ github.event.inputs.node-version }}, "test-case": ${{ github.event.inputs.test-case }}, "os": ${{ github.event.inputs.os }} }'
-          else
-            bash ./scripts/convert-test-case.sh ./scripts/pvt.json
-            matrix=$(cat ./scripts/test-case-temp.json)
-          fi
-
-          echo "matrix=${matrix}" >> $GITHUB_OUTPUT
-
-      - name: Download TTK
-        run: |
-          echo ${{ secrets.GITHUB_TOKEN }} | gh auth login --with-token 
-          gh run download ${{ env.vsix-run-id }} --repo OfficeDev/TeamsFx --name release
-
-      - name: Export TTK version
-        id: ttk
-        run: |
-          package=`find . -type f -name "*.vsix" | sed 's|.*/\(.*\)|\1|'`
-          version=`echo $package | sed 's|ms-teams-vscode-extension-||' | sed 's|\.vsix||'`
-          echo "package=$package" >> $GITHUB_OUTPUT
-          echo "version=$version" >> $GITHUB_OUTPUT
-
-      - name: Upload TTK to artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: ttk
-          path: |
-            ./${{ steps.ttk.outputs.package }}
-
-      - name: Archive Test Plan
-        if: contains(steps.ttk.outputs.version, 'alpha') == false
-        working-directory: ./packages/tests
-        run: |
-          npm install
-          testplanid='${{ github.event.inputs.target-testplan-id }}'
-          if [ -z "$testplanid" ]; then
-            testplanid=`npx ts-node src/scripts/testPlan.ts obtain vscode ${{ steps.ttk.outputs.version }}`
-          fi
-          npx ts-node src/scripts/testPlan.ts archive $testplanid
-
-      - name: Upload testplan to artifact
-        if: contains(steps.ttk.outputs.version, 'alpha') == false
-        uses: actions/upload-artifact@v3
-        with:
-          name: testplan
-          path: |
-            ./packages/tests/testplan.json
 
     outputs:
-      npm-tag: ${{ steps.bvt.outputs.npm-tag || steps.pvt.outputs.npm-tag }}
-      sample-ref: ${{ steps.bvt.outputs.sample-ref || steps.pvt.outputs.sample-ref }}
-      branch: ${{ steps.bvt.outputs.branch || steps.pvt.outputs.branch }}
-      email-receiver: ${{ steps.bvt.outputs.email-receiver || steps.pvt.outputs.email-receiver }}
-      vsix-run-id: ${{ env.vsix-run-id }}
-      matrix: ${{ steps.setup-matrix.outputs.matrix }}
-      ttk-package: ${{ steps.ttk.outputs.package }}
-      ttk-version: ${{ steps.ttk.outputs.version }}
-      target_cli_version: ${{ env.target_cli_version }}
       AZURE_CLIENT_SECRET: ${{ steps.gpg.outputs.AZURE_CLIENT_SECRET }}
       AZURE_CLIENT_ID: ${{ steps.gpg.outputs.AZURE_CLIENT_ID }}
       CLEAN_CLIENT_ID: ${{ steps.gpg.outputs.CLEAN_CLIENT_ID }}
