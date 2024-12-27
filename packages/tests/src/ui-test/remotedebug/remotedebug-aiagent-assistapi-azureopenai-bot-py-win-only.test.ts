@@ -15,6 +15,7 @@ import {
 import {
   execCommandIfExist,
   createNewProject,
+  createEnvironmentWithPython,
 } from "../../utils/vscodeOperation";
 import {
   initPage,
@@ -24,6 +25,7 @@ import { Env, OpenAiKey } from "../../utils/env";
 import { it } from "../../utils/it";
 import { editDotEnvFile, validateFileExist } from "../../utils/commonUtils";
 import { Executor } from "../../utils/executor";
+import os from "os";
 
 describe("Remote debug Tests", function () {
   this.timeout(Timeout.testAzureCase);
@@ -74,6 +76,7 @@ describe("Remote debug Tests", function () {
         aiType: "Azure OpenAI",
       });
       validateFileExist(projectPath, "src/app.py");
+      await createEnvironmentWithPython();
       const envPath = path.resolve(projectPath, "env", ".env.dev.user");
       const isRealKey = OpenAiKey.azureOpenAiKey ? true : false;
       const azureOpenAiKey = OpenAiKey.azureOpenAiKey
@@ -94,10 +97,49 @@ describe("Remote debug Tests", function () {
         azureOpenAiModelDeploymentName
       );
 
+      {
+        // create azure assistant need to use local env
+        const localEnvPath = path.resolve(
+          projectPath,
+          "env",
+          ".env.local.user"
+        );
+        const azureOpenAiKey = OpenAiKey.azureOpenAiKey
+          ? OpenAiKey.azureOpenAiKey
+          : "fake";
+        const azureOpenAiEndpoint = OpenAiKey.azureOpenAiEndpoint
+          ? OpenAiKey.azureOpenAiEndpoint
+          : "https://test.com";
+        const azureOpenAiModelDeploymentName =
+          OpenAiKey.azureOpenAiModelDeploymentName
+            ? OpenAiKey.azureOpenAiModelDeploymentName
+            : "fake";
+        editDotEnvFile(
+          localEnvPath,
+          "SECRET_AZURE_OPENAI_API_KEY",
+          azureOpenAiKey
+        );
+        editDotEnvFile(
+          localEnvPath,
+          "AZURE_OPENAI_ENDPOINT",
+          azureOpenAiEndpoint
+        );
+        editDotEnvFile(
+          localEnvPath,
+          "AZURE_OPENAI_MODEL_DEPLOYMENT_NAME",
+          azureOpenAiModelDeploymentName
+        );
+      }
+
       if (isRealKey) {
         console.log("Start to create azure assistant id");
 
-        const insertDataCmd = `python src/utils/creator.py --api-key ${azureOpenAiKey}`;
+        let insertDataCmd = "";
+        if (os.type() === "Windows_NT") {
+          insertDataCmd = `python src/utils/creator.py --api-key ${azureOpenAiKey}`;
+        } else {
+          insertDataCmd = `python src/utils/creator.py --api-key '${azureOpenAiKey}'`;
+        }
         const { success: insertDataSuccess, stdout: log } =
           await Executor.execute(insertDataCmd, projectPath);
         // get assistant id from log string
