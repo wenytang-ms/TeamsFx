@@ -106,6 +106,8 @@ export enum QuestionNames {
   ImportPlugin = "import-plugin",
   PluginManifestFilePath = "plugin-manifest-path",
   PluginOpenApiSpecFilePath = "plugin-opeanapi-spec-path",
+
+  AuthName = "auth-name",
 }
 
 export enum ProjectTypeGroup {
