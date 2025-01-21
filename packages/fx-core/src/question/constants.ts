@@ -1103,13 +1103,16 @@ export class TeamsAppValidationOptions {
     return {
       id: "validateAgainstPackage",
       label: getLocalizedString("core.selectValidateMethodQuestion.validate.appPackageOption"),
+      detail: getLocalizedString(
+        "core.selectValidateMethodQuestion.validate.appPackageOptionDescription"
+      ),
     };
   }
   static testCases(): OptionItem {
     return {
       id: "validateWithTestCases",
       label: getLocalizedString("core.selectValidateMethodQuestion.validate.testCasesOption"),
-      description: getLocalizedString(
+      detail: getLocalizedString(
         "core.selectValidateMethodQuestion.validate.testCasesOptionDescription"
       ),
     };
